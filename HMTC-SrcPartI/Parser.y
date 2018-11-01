@@ -72,6 +72,7 @@ import Scanner
     WHILE       { (While, $$) }
 	REPEAT      { (Repeat, $$) } --T1.1
 	UNTIL		{ (Until, $$) }  --T1.1
+	ELSIF       { (Elsif, $$) }  --T1.3
     LITINT      { (LitInt {}, _) }
     ID          { (Id {}, _) }
     '+'         { (Op {opName="+"},   _) }
@@ -114,8 +115,10 @@ command
         { CmdAssign {caVar = $1, caVal=$3, cmdSrcPos = srcPos $1} }
     | var_expression '(' expressions ')'
         { CmdCall {ccProc = $1, ccArgs = $3, cmdSrcPos = srcPos $1} }
+	| IF expression THEN command --T1.3
+        { CmdIf {ciCond = $2, ciThen = $4, cmdSrcPos = $1} }
     | IF expression THEN command ELSE command
-        { CmdIf {ciCond = $2, ciThen = $4, ciElse = $6, cmdSrcPos = $1} }
+        { CmdIfElse {ciCond = $2, ciThen = $4, ciElse = $6, cmdSrcPos = $1} }
     | WHILE expression DO command
         { CmdWhile {cwCond = $2, cwBody = $4, cmdSrcPos = $1} }
     | LET declarations IN command

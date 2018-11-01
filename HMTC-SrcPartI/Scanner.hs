@@ -152,6 +152,7 @@ scanner cont = P $ scan
         mkIdOrKwd "while"   = While
         mkIdOrKwd "repeat"  = Repeat --T1.1
         mkIdOrKwd "until"   = Until --T1.1
+        mkIdOrKwd "elsif"   = Elsif --T1.3
         mkIdOrKwd name      = Id {idName = name}
 
         -- Return token, position of token, updated position, and remaning

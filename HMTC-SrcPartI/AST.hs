@@ -90,8 +90,14 @@ data Command
           csCmds    :: [Command],       -- ^ Commands
           cmdSrcPos :: SrcPos
       }
-    -- | Conditional command
+    -- | Conditional command T1.3
     | CmdIf {
+          ciCond    :: Expression,      -- ^ Condition
+          ciThen    :: Command,         -- ^ Then-branch
+          cmdSrcPos :: SrcPos
+      }
+    -- | Conditional command
+    | CmdIfElse {
           ciCond    :: Expression,      -- ^ Condition
           ciThen    :: Command,         -- ^ Then-branch
           ciElse    :: Command,         -- ^ Else-branch
