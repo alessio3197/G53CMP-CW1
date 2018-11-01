@@ -109,10 +109,10 @@ data Command
           clBody    :: Command,         -- ^ Let-body
           cmdSrcPos :: SrcPos
       }
-    -- | Repeat-Until-command
+    -- | Repeat-Until-command T1.1
     | CmdRep {
           crComm    :: Command,         -- ^ Repeat-condition
-          cuExpr    :: Expression,            -- ^ Until-expression
+          cuExpr    :: Expression,      -- ^ Until-expression
           cmdSrcPos :: SrcPos
       } 
 
@@ -137,6 +137,13 @@ data Expression
     | ExpApp {
           eaFun     :: Expression,      -- ^ Applied function or operator
           eaArgs    :: [Expression],    -- ^ Arguments
+          expSrcPos :: SrcPos
+      }
+    -- | Conditional Expression T1.2
+    | ExpCond {
+          eaBool    :: Expression,
+          eaFirst   :: Expression,
+          eaSecond  :: Expression,
           expSrcPos :: SrcPos
       }
 

@@ -58,6 +58,7 @@ import Scanner
     ':'         { (Colon, $$) }
     ':='        { (ColEq, $$) }
     '='         { (Equals, $$) }
+	'?'         { (Question, $$) } --T1.2
     BEGIN       { (Begin, $$) }
     CONST       { (Const, $$) }
     DO          { (Do, $$) }
@@ -69,8 +70,8 @@ import Scanner
     THEN        { (Then, $$) }
     VAR         { (Var, $$) }
     WHILE       { (While, $$) }
-	REPEAT      { (Repeat, $$) }
-	UNTIL		{ (Until, $$) }
+	REPEAT      { (Repeat, $$) } --T1.1
+	UNTIL		{ (Until, $$) }  --T1.1
     LITINT      { (LitInt {}, _) }
     ID          { (Id {}, _) }
     '+'         { (Op {opName="+"},   _) }
@@ -88,6 +89,7 @@ import Scanner
     '||'        { (Op {opName="||"},  _) }
     '!'         { (Op {opName="!"},   _) }
 
+%right ':' --T1.2
 %left '||'
 %left '&&'
 %nonassoc '<' '<=' '==' '!=' '>=' '>'
@@ -124,7 +126,7 @@ command
           else
               CmdSeq {csCmds = $2, cmdSrcPos = srcPos $2}
         }
-	| REPEAT command UNTIL expression
+	| REPEAT command UNTIL expression --T1.1
 		{ CmdRep {crComm = $2, cuExpr = $4, cmdSrcPos = $1} }
 
 
@@ -150,29 +152,35 @@ expression
     : primary_expression
         { $1 }
     | expression opclass_disjunctive expression %prec '||'
-        { ExpApp {eaFun     = $2,
-                  eaArgs    = [$1,$3],
-                  expSrcPos = srcPos $1} }
+        { ExpApp  {eaFun     = $2,
+                   eaArgs    = [$1,$3],
+                   expSrcPos = srcPos $1} }
     | expression opclass_conjunctive expression %prec '&&'
-        { ExpApp {eaFun     = $2,
-                  eaArgs    = [$1,$3],
-                  expSrcPos = srcPos $1} }
+        { ExpApp  {eaFun     = $2,
+                   eaArgs    = [$1,$3],
+                   expSrcPos = srcPos $1} }
     | expression opclass_relational expression %prec '=='
-        { ExpApp {eaFun     = $2,
-                  eaArgs    = [$1,$3],
-                  expSrcPos = srcPos $1} }
+        { ExpApp  {eaFun     = $2,
+                   eaArgs    = [$1,$3],
+                   expSrcPos = srcPos $1} }
     | expression opclass_additive expression %prec '+'
-        { ExpApp {eaFun     = $2,
-                  eaArgs    = [$1,$3],
-                  expSrcPos = srcPos $1} }
+        { ExpApp  {eaFun     = $2,
+                   eaArgs    = [$1,$3],
+                   expSrcPos = srcPos $1} }
     | expression opclass_multiplicative expression %prec '*'
-        { ExpApp {eaFun     = $2,
-                  eaArgs    = [$1,$3],
-                  expSrcPos = srcPos $1} }
+        { ExpApp  {eaFun     = $2,
+                   eaArgs    = [$1,$3],
+                   expSrcPos = srcPos $1} }
     | expression opclass_exponential expression %prec '^'
-        { ExpApp {eaFun     = $2,
-                  eaArgs    = [$1,$3],
-                  expSrcPos = srcPos $1} }
+        { ExpApp  {eaFun     = $2,
+                   eaArgs    = [$1,$3],
+                   expSrcPos = srcPos $1} }
+	-- T1.2
+    | expression '?' expression ':' expression
+        { ExpCond {eaBool    = $1,
+                   eaFirst   = $3,
+                   eaSecond  = $5,
+                   expSrcPos = srcPos $1} }				   
 
 
 primary_expression :: { Expression }
@@ -198,8 +206,7 @@ primary_expression :: { Expression }
 
 var_expression :: { Expression }
     : ID { ExpVar {evVar = tspIdName $1, expSrcPos = tspSrcPos $1} }
-
-
+	
 opclass_disjunctive :: { Expression }
     : '||' { mkExpVarBinOp $1 }
 

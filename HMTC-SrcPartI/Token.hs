@@ -30,6 +30,7 @@ data Token
     | Colon     -- ^ \":\"
     | ColEq     -- ^ \":=\"
     | Equals    -- ^ \"=\"
+    | Question  -- ^ \"?\" T1.2
 
     -- Keywords
     | Begin     -- ^ \"begin\"
@@ -43,8 +44,8 @@ data Token
     | Then      -- ^ \"then\"
     | Var       -- ^ \"var\"
     | While     -- ^ \"while\"
-    | Repeat    -- ^ \"repeat\"
-    | Until     -- ^ \"until\"
+    | Repeat    -- ^ \"repeat\" T1.1
+    | Until     -- ^ \"until\"  T1.1
 
     -- Tokens with variable spellings
     | LitInt {liVal :: Integer}         -- ^ Integer literals
