@@ -17,6 +17,7 @@
 module AST (
     AST (..),           -- Not abstract. Instances: HasSrcPos.
     Command (..),       -- Not abstract. Instances: HasSrcPos.
+    ElsifCommand (..),  -- Not abstract. Instances: HasSrcPos. T1.3
     Expression (..),    -- Not abstract. Instances: HasSrcPos.
     Declaration (..),   -- Not abstract. Instances: HasSrcPos.
     TypeDenoter (..)    -- Not abstract. Instances: HasSrcPos.
@@ -93,14 +94,7 @@ data Command
     -- | Conditional command T1.3
     | CmdIf {
           ciCond    :: Expression,      -- ^ Condition
-          ciThen    :: Command,         -- ^ Then-branch
-          cmdSrcPos :: SrcPos
-      }
-    -- | Conditional command
-    | CmdIfElse {
-          ciCond    :: Expression,      -- ^ Condition
-          ciThen    :: Command,         -- ^ Then-branch
-          ciElse    :: Command,         -- ^ Else-branch
+          ciThen    :: ElsifCommand,         -- ^ Then-branch
           cmdSrcPos :: SrcPos
       }
     -- | While-loop
@@ -122,6 +116,22 @@ data Command
           cmdSrcPos :: SrcPos
       } 
 
+data ElsifCommand --T1.3
+    = Cmd { --Command
+          cmd :: Command,
+          elCmdSrcPos :: SrcPos
+      }
+    | ElCmd { --Cmd-else-cmd
+          elfCmd :: Command,
+          elsCmd :: Command,
+          elCmdSrcPos :: SrcPos
+      }
+    | ElsifCmd { --cmd-elsif-exp-then-elsifcmd
+          eifCmd :: Command,
+          eifExp :: Expression,
+          einCmd :: ElsifCommand,
+          elCmdSrcPos :: SrcPos
+      }
 
 instance HasSrcPos Command where
     srcPos = cmdSrcPos

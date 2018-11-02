@@ -115,10 +115,8 @@ command
         { CmdAssign {caVar = $1, caVal=$3, cmdSrcPos = srcPos $1} }
     | var_expression '(' expressions ')'
         { CmdCall {ccProc = $1, ccArgs = $3, cmdSrcPos = srcPos $1} }
-	| IF expression THEN command --T1.3
+	| IF expression THEN elsifCommand --T1.3
         { CmdIf {ciCond = $2, ciThen = $4, cmdSrcPos = $1} }
-    | IF expression THEN command ELSE command
-        { CmdIfElse {ciCond = $2, ciThen = $4, ciElse = $6, cmdSrcPos = $1} }
     | WHILE expression DO command
         { CmdWhile {cwCond = $2, cwBody = $4, cmdSrcPos = $1} }
     | LET declarations IN command
@@ -132,6 +130,14 @@ command
 	| REPEAT command UNTIL expression --T1.1
 		{ CmdRep {crComm = $2, cuExpr = $4, cmdSrcPos = $1} }
 
+elsifCommand :: { elsifCommand }
+elsifCommand
+    : command
+        { Cmd {cmd = $1, elCmdSrcPos = srcPos $1} }
+    | command ELSE command
+        { ElCmd {elfCmd = $1, elsCmd = $3, elCmdSrcPos = srcPos $1} }
+	| command ELSIF expression THEN elsifCommand
+        { ElsifCmd {eifCmd = $1, eifExp = $3, einCmd = $5, elCmdSrcPos = srcPos $1 } }
 
 expressions :: { [Expression] }
 expressions : expression { [$1] }
