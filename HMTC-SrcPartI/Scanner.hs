@@ -69,7 +69,6 @@ isOpChr '|'  = True
 isOpChr '~'  = True
 isOpChr _    = False
 
-
 -- Tab stop separation
 tabWidth :: Int
 tabWidth = 8
@@ -99,10 +98,13 @@ scanner cont = P $ scan
         scan l c (')' : s)  = retTkn RPar l c (c + 1) s
         scan l c (',' : s)  = retTkn Comma l c (c + 1) s
         scan l c (';' : s)  = retTkn Semicol l c (c + 1) s
+        -- Scan Character Literals T1.4
+        scan l c ('\'' : x : '\'' : s) = scanCharLit l c x s
+        scan l c ('\'' : '\\' : x :'\'' : s) = retTkn (CharLit (convertEscCh x)) l c (c+4) s
         -- Scan numeric literals, operators, identifiers, and keywords
         scan l c (x : s) | isDigit x = scanLitInt l c x s
                          | isAlpha x = scanIdOrKwd l c x s
-                         | isOpChr x = scanOperator l c x s
+                         | isOpChr x = scanOperator l c x s 
                          | otherwise = do
                                            emitErrD (SrcPos l c)
                                                     ("Lexical error: Illegal \
@@ -111,6 +113,21 @@ scanner cont = P $ scan
                                                      ++ " (discarded)")
                                            scan l (c + 1) s
 
+		-- T1.4
+        scanCharLit l c x s | (x /= '\'') && (x /= '\\') = retTkn (CharLit x) l c (c+3) s
+                            | otherwise = do
+                                           emitErrD (SrcPos l c)
+                                                    ("Lexical error: Illegal \
+                                                     \character "
+                                                     ++ show x
+                                                     ++ " (discarded)")
+                                           scan l (c + 1) s
+        convertEscCh x | x == 'n' = '\n'
+                       | x == 'r' = '\r'
+                       | x == 't' = '\t'
+                       | x == '\\' = '\\'
+                       | x == '\'' = '\''
+        
 
         -- scanLitInt :: Int -> Int -> Char -> String -> D a
         scanLitInt l c x s = retTkn (LitInt (read (x : tail))) l c c' s'

@@ -162,6 +162,11 @@ data Expression
           eaSecond  :: Expression,
           expSrcPos :: SrcPos
       }
+    -- | Character Literal T1.4
+    | ExpCharLit {
+          eChLit    :: Char,
+          expSrcPos :: SrcPos
+      }
 
 
 instance HasSrcPos Expression where

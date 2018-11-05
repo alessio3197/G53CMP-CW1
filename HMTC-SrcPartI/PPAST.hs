@@ -105,6 +105,9 @@ ppExpression n (ExpCond {eaBool = b, eaFirst = f, eaSecond = s, expSrcPos = sp})
     . ppExpression (n+1) b
     . ppExpression (n+1) f
     . ppExpression (n+1) s
+-- T1.4
+ppExpression n (ExpCharLit {eChLit = c}) = 
+    indent n . showString "ExpCharLit". spc . shows c . nl
 
 
 ------------------------------------------------------------------------------

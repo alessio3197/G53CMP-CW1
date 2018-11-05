@@ -74,6 +74,7 @@ import Scanner
 	UNTIL		{ (Until, $$) }  --T1.1
 	ELSIF       { (Elsif, $$) }  --T1.3
     LITINT      { (LitInt {}, _) }
+    CHARLIT     { (CharLit {}, _) } --T1.4
     ID          { (Id {}, _) }
     '+'         { (Op {opName="+"},   _) }
     '-'         { (Op {opName="-"},   _) }
@@ -130,6 +131,7 @@ command
 	| REPEAT command UNTIL expression --T1.1
 		{ CmdRep {crComm = $2, cuExpr = $4, cmdSrcPos = $1} }
 
+--T1.3
 elsifCommand :: { elsifCommand }
 elsifCommand
     : command
@@ -184,7 +186,7 @@ expression
         { ExpApp  {eaFun     = $2,
                    eaArgs    = [$1,$3],
                    expSrcPos = srcPos $1} }
-	-- T1.2
+    -- T1.2
     | expression '?' expression ':' expression
         { ExpCond {eaBool    = $1,
                    eaFirst   = $3,
@@ -201,7 +203,8 @@ primary_expression :: { Expression }
         { ExpApp {eaFun = $1, eaArgs = [$2], expSrcPos = srcPos $1}}
     | '(' expression ')'
         { $2 }
-
+    | CHARLIT --T1.4
+        { ExpCharLit {eChLit = tspChVal $1 , expSrcPos = tspSrcPos $1} }    
 
 -- Variables being assigned to, procedures being called, and functions being
 -- applied (currently only operators) are restricted to be denoted by simple
@@ -316,6 +319,12 @@ tspIdName _ = parserErr "tspIdName" "Not an Id"
 tspOpName :: (Token,SrcPos) -> Name
 tspOpName (Op {opName = nm}, _) = nm
 tspOpName _ = parserErr "tspOpName" "Not an Op"
+
+
+-- T1.4
+tspChVal :: (Token,SrcPos) -> Char
+tspChVal (CharLit {chVal = c}, _) = c
+tspChVal _ = parserErr "tspChVal" "Not a Character Literal"
 
 
 -- Helper functions for building ASTs.
